@@ -1,198 +1,121 @@
-// кнопка: "показать все" / "скрыть"
-var btn = document.querySelector('.btn');
-// контейнер карточек
-var container = document.querySelector('.cards');
-// список карточек
-var cards = document.querySelector('.cards__list');
-// коллекция всех карточек
-var cardsList = Array.from(cards.querySelectorAll('.cards__card'));
-// текст и символ кнопки
-var btnText = btn.querySelector('.btn__text_open');
-var btnArrow = btn.querySelector('div');
-// счетчик index
-var countIndex = 0;
-
-// window.addEventListener('resize', event => {
-//     if (event.target.window.innerWidth >= 768 && event.target.window.innerWidth <= 1119) widthWindow768();    
-//     if (event.target.window.innerWidth > 1119) widthWindow1120();
-//     if (event.target.window.innerWidth < 768) widthWindow320();
-// });
-
-
-var openAllCards = function (indexMax) {
-    var isOpen = false; // Флаг, указывающий, открыты ли карточки
-
-    btn.addEventListener('click', function () {
-        if (isOpen) {
-            // Если карточки открыты, скрыть все, кроме исходного количества карточек
-            for (let i = indexMax; i < cardsList.length; i++) {
-                cardsList[i].classList.add('hidden');
+class CardUtils {
+    constructor() {
+        this.config = {
+            sliderClass: 'swiper-slide',
+            isOpen: false,
+            'S': {
+                size: 320,
+                amount: 999
+            },
+            'M': {
+                size: 768,
+                amount: 6
+            },
+            'L': {
+                size: 1120,
+                amount: 8
             }
-            btnText.textContent = 'Показать все';
-            btnArrow.classList.remove('active');
-            isOpen = false;
-        } else {
-            // Если карточки скрыты, показать все карточки
-            for (let i = indexMax; i < cardsList.length; i++) {
-                cardsList[i].classList.remove('hidden');
-            }
-            btnText.textContent = 'Скрыть';
-            btnArrow.classList.add('active');
-            isOpen = true;
         }
-    });
-};
 
-var widthWindow1120 = function () {
-    if (window.innerWidth > 1119) {
-        cardsList.forEach((item, index) => {
-            item.classList.add('hidden');
-            if (index <= 7) {
-                item.classList.remove('hidden');
-                countIndex = index + 1; // Обновляем значение countIndex на один больше, чем index
-            }
+        this.cards = Array.from(
+            document
+                .querySelector('.cards__list')
+                .querySelectorAll('.cards__card'))
+            ;
+        this.btn = document.getElementById('show_all')
+
+        this.addListeners();
+    }
+
+    displayOnResize(amountOfCards) {
+        if (this.config.isOpen) {
+            return;
+        }
+        let hideIterations = this.cards.length - amountOfCards;
+        let counter = hideIterations;
+
+        let cardsCopy = this.cards.slice();
+        this.displayAll(cardsCopy);
+
+        cardsCopy.forEach(card => {
+            card.classList.remove(this.config.sliderClass);
         });
 
-        openAllCards(countIndex); // Передаем значение countIndex в функцию openAllCards
-    }
-};
-
-
-var widthWindow768 = function () {
-    if (768 <= window.innerWidth && window.innerWidth <= 1119) { 
-
-        cardsList.forEach((item, index) => {
-            item.classList.add('hidden');
-            if (index <= 5) {
-                item.classList.remove('hidden');
-                countIndex = index + 1; // Обновляем значение countIndex на один больше, чем index
+        cardsCopy.reverse().forEach(card => {
+            if (counter <= 0) {
+                return;
             }
+            card.classList.add('hidden');
+            counter--;
         });
 
-        openAllCards(countIndex); // Передаем значение countIndex в функцию openAllCards
+        this.cards = cardsCopy.reverse();
     }
-};
 
-var widthWindow320 = function () {
-    if (windiw.matchMedia) {
-        var screen = window.matchMedia("(max-width: 767px)");
-        screen.addEventListener('change', changes);
-        changes(screen);
+    displayAll(cards) {
+        cards.forEach(card => {
+            card.classList.remove('hidden');
+        })
     }
-    function changes(screen) {
-        if (screen.matches) {
-            for (let i = 0; i < cardsList.length; i++) {
-                cardsList[i].classList.remove('hidden');
-            };
-    
-            var pagination = document.createElement('div');
-            pagination.classList.add('swiper-pagination');
-            container.appendChild(pagination);
-    
-            container.classList.add('swiper-container');
-            cards.classList.add('swiper-wrapper');
-    
-            for (let i = 0; i < cardsList.length; i++) {
-                cardsList[i].classList.add('swiper-slide');
-            };
-        };
-    };
-};
 
-widthWindow768();
-widthWindow1120();
-widthWindow320();
+    addListeners() {
+        window.addEventListener('resize', () => {
+            this.triggerResize()
+        })
 
+        this.btn.addEventListener('click', () => {
+            this.handleClick();
+        })
+    }
 
-        // const width = window.innerWidth
-        // if (width < 768){
-        
-        // for (let i = 0; i < cardsList.length; i++) {
-        //     cardsList[i].classList.remove('hidden');
-        // };
+    handleClick() {
+        if (this.config.isOpen === false) {
+            this.displayAll(this.cards);
+            // change btn name
+            this._setOpen();
+            return;
+        }
 
-        // var pagination = document.createElement('div');
-        // pagination.classList.add('swiper-pagination');
-        // container.appendChild(pagination);
+        if (this.config.isOpen === true) {
+            this._setClose();
+            this.triggerResize();
+            //change btn name
+            return;
+        }
+    }
 
-        // container.classList.add('swiper-container');
-        // cards.classList.add('swiper-wrapper');
+    triggerResize() {
+        const width = window.innerWidth;
+        if (width >= this.config.L.size) {
+            this.displayOnResize(this.config.L.amount)
+        } else if (width >= this.config.M.size) {
+            this.displayOnResize(this.config.M.amount)
+        } else {
+            this.displayAll(this.cards);
+            this.addSwiper();
+        }
+    }
 
-        // for (let i = 0; i < cardsList.length; i++) {
-        //     cardsList[i].classList.add('swiper-slide');
-        // };
+    _setOpen() {
+        this.config.isOpen = true;
+    }
 
-    //   const slider = new Swiper('.cards', {
-    //     //Optional parameters
-    //     loop: true,
-      
-    //     //pagination
-    //     pagination: {
-    //       el: '.swiper-pagination',
-    //     },
-     
-    //   });
-//     };
-// };
+    _setClose() {
+        this.config.isOpen = false;
+    }
 
+    addSwiper() {
+        this.cards.forEach(card => {
+            card.classList.add(this.config.sliderClass)
+        })
 
-// var widthWindow320 = function () {
-    
-//     if (window.innerWidth < 768) {
-        
-//         cardsList.forEach((item) => {item.classList.add('swiper-slide')});
-
-//         for (let i = 0; i < cardsList.length; i++) {
-//             cardsList[i].classList.remove('hidden');
-//         };
-
-//         //создание пагинации
-//         var pagination = document.createElement('div');
-//         pagination.classList.add('swiper-pagination');
-//         container.appendChild(pagination);
-
-//         container.classList.add('swiper-container');
-//         cards.classList.add('swiper-wrapper');
-//         cardsList.forEach((item) => {item.classList.add('swiper-slide')});
-
-//         //инициализация слайдера
-//         new Swiper('.cards');
-//     };
-// };
-
-// widthWindow320();
-
-// var swiperFunction = function() {
-// document.addEventListener('DOMContentLoaded', () => {
-
-//     if (window.innerWidth < 768){
-    
-//         var pagination = document.createElement('div');
-//         pagination.classList.add('swiper-pagination');
-//         container.appendChild(pagination);
-
-//         container.classList.add('swiper-container');
-//         cards.classList.add('swiper-wrapper');
-
-//         for (let i = 0; i < cardsList.length; i++) {
-//             cardsList[i].classList.add('swiper-slide');
-//         };
-
-//       const slider = new Swiper('.cards', {
-//         // Optional parameters
-//         loop: true,
-      
-//         // If we need pagination
-//         pagination: {
-//           el: '.swiper-pagination',
-//         },
-      
-//         // Navigation arrows
-      
-//         // And if we need scrollbar
-     
-//       });
-//     };
-// });
-// };
-
+        const slider = new Swiper('.cards', {
+            loop: true,
+            pagination: {
+                el: '.swiper-pagination',
+            }
+        });
+    }
+}
+const cardUtils = new CardUtils();
+cardUtils.triggerResize();
