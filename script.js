@@ -22,7 +22,9 @@ class CardUtils {
                 .querySelector('.cards__list')
                 .querySelectorAll('.cards__card'))
             ;
-        this.btn = document.getElementById('show_all')
+        this.btn = document.getElementById('show_all');
+        this.btnText = document.querySelector('.btn__text_open');
+        this.btnArrow = document.querySelector('.btn__arrow');
 
         this.addListeners();
     }
@@ -71,7 +73,8 @@ class CardUtils {
     handleClick() {
         if (this.config.isOpen === false) {
             this.displayAll(this.cards);
-            // change btn name
+            this.btnText.textContent = 'Скрыть';
+            this.btnArrow.classList.add('active');
             this._setOpen();
             return;
         }
@@ -79,7 +82,8 @@ class CardUtils {
         if (this.config.isOpen === true) {
             this._setClose();
             this.triggerResize();
-            //change btn name
+            this.btnText.textContent = 'Показать все';
+            this.btnArrow.classList.remove('active');
             return;
         }
     }
@@ -90,7 +94,7 @@ class CardUtils {
             this.displayOnResize(this.config.L.amount)
         } else if (width >= this.config.M.size) {
             this.displayOnResize(this.config.M.amount)
-        } else {
+        } else if (width < this.config.M.size) {
             this.displayAll(this.cards);
             this.addSwiper();
         }
@@ -105,17 +109,36 @@ class CardUtils {
     }
 
     addSwiper() {
+
         this.cards.forEach(card => {
             card.classList.add(this.config.sliderClass)
         })
 
-        const slider = new Swiper('.cards', {
+        const slider = new Swiper('.swiper', {
+
             loop: true,
             pagination: {
                 el: '.swiper-pagination',
+                type: 'bullets',
+                clickable: true,
+            },
+
+            slidesPerView: 'auto',
+
+            spaceBetween: 16,
+
+            768: {
+                initialSlide: 0,
+                spaceBetween: 0,
+                enabled: false
             }
         });
+
+        window.addEventListener('resize', () => {
+            slider.update(); 
+        });
     }
+
 }
 const cardUtils = new CardUtils();
 cardUtils.triggerResize();

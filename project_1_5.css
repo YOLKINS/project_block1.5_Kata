@@ -53,6 +53,9 @@ body {
 
     margin: 0;
 
+    font-family: 'TT Lakes Regular';
+    font-weight: 400;
+    font-style: normal;
     font-size: 16px;
     line-height: 24px;
     letter-spacing: -0.2px;
@@ -154,9 +157,9 @@ button {
         width: 224px;
     }
 
-    .cards__card:nth-child(3n) {
+    /* .cards__card:nth-child(3n) {
         margin-right: 0px;
-    }
+    } */
 }
 
 @media screen and (max-width: 767px) {
@@ -182,9 +185,9 @@ button {
     }
 
     .cards__card {
-        min-width: 240px;
+        width: 240px !important;
 
-        margin-right: 16px;
+        margin-right: 0;
     }   
 }
 
